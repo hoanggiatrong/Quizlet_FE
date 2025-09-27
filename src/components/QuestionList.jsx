@@ -257,7 +257,7 @@ const QuestionList = ({ questions, quizId, onQuestionsUpdate }) => {
                 <h4 className="text-sm font-medium mb-1" style={{ color: 'rgba(59, 130, 246, 0.9)' }}>
                   Giải thích:
                 </h4>
-                <p className="text-sm" style={{ color: 'rgba(59, 130, 246, 0.8)' }}>
+                <p className="text-sm whitespace-pre-line" style={{ color: 'rgba(59, 130, 246, 0.8)' }}>
                   {question.explanation}
                 </p>
               </div>

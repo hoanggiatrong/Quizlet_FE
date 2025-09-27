@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from "react";
 
 // API Base URL - same as in api.js
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://35.240.251.182:3000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://35.240.251.182:3000";
 
 // Initial state
 const initialState = {
@@ -14,15 +15,15 @@ const initialState = {
 
 // Action types
 const AUTH_ACTIONS = {
-  LOGIN_START: 'LOGIN_START',
-  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
-  LOGIN_FAILURE: 'LOGIN_FAILURE',
-  REGISTER_START: 'REGISTER_START',
-  REGISTER_SUCCESS: 'REGISTER_SUCCESS',
-  REGISTER_FAILURE: 'REGISTER_FAILURE',
-  LOGOUT: 'LOGOUT',
-  SET_LOADING: 'SET_LOADING',
-  REFRESH_TOKEN_SUCCESS: 'REFRESH_TOKEN_SUCCESS',
+  LOGIN_START: "LOGIN_START",
+  LOGIN_SUCCESS: "LOGIN_SUCCESS",
+  LOGIN_FAILURE: "LOGIN_FAILURE",
+  REGISTER_START: "REGISTER_START",
+  REGISTER_SUCCESS: "REGISTER_SUCCESS",
+  REGISTER_FAILURE: "REGISTER_FAILURE",
+  LOGOUT: "LOGOUT",
+  SET_LOADING: "SET_LOADING",
+  REFRESH_TOKEN_SUCCESS: "REFRESH_TOKEN_SUCCESS",
 };
 
 // Reducer
@@ -34,7 +35,7 @@ const authReducer = (state, action) => {
         ...state,
         isLoading: true,
       };
-    
+
     case AUTH_ACTIONS.LOGIN_SUCCESS:
     case AUTH_ACTIONS.REGISTER_SUCCESS:
       return {
@@ -45,7 +46,7 @@ const authReducer = (state, action) => {
         isAuthenticated: true,
         isLoading: false,
       };
-    
+
     case AUTH_ACTIONS.LOGIN_FAILURE:
     case AUTH_ACTIONS.REGISTER_FAILURE:
       return {
@@ -56,7 +57,7 @@ const authReducer = (state, action) => {
         isAuthenticated: false,
         isLoading: false,
       };
-    
+
     case AUTH_ACTIONS.LOGOUT:
       return {
         ...state,
@@ -66,20 +67,20 @@ const authReducer = (state, action) => {
         isAuthenticated: false,
         isLoading: false,
       };
-    
+
     case AUTH_ACTIONS.SET_LOADING:
       return {
         ...state,
         isLoading: action.payload,
       };
-    
+
     case AUTH_ACTIONS.REFRESH_TOKEN_SUCCESS:
       return {
         ...state,
         accessToken: action.payload.accessToken,
         refreshToken: action.payload.refreshToken,
       };
-    
+
     default:
       return state;
   }
@@ -96,14 +97,17 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadAuthData = () => {
       try {
-        const accessToken = localStorage.getItem('accessTokenQuiz');
-        const refreshToken = localStorage.getItem('refreshTokenQuiz');
-        const user = localStorage.getItem('user');
+        const accessToken = localStorage.getItem("accessTokenQuiz");
+        const refreshToken = localStorage.getItem("refreshTokenQuiz");
+        const user = localStorage.getItem("user");
 
         if (accessToken && refreshToken && user) {
           const parsedUser = JSON.parse(user);
-          console.log("AuthContext - Loading user from localStorage:", parsedUser);
-          
+          console.log(
+            "AuthContext - Loading user from localStorage:",
+            parsedUser
+          );
+
           dispatch({
             type: AUTH_ACTIONS.LOGIN_SUCCESS,
             payload: {
@@ -116,7 +120,7 @@ export const AuthProvider = ({ children }) => {
           dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         }
       } catch (error) {
-        console.error('Error loading auth data:', error);
+        console.error("Error loading auth data:", error);
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
@@ -126,87 +130,87 @@ export const AuthProvider = ({ children }) => {
 
   // Save auth data to localStorage
   const saveAuthData = (user, accessToken, refreshToken) => {
-    localStorage.setItem('accessTokenQuiz', accessToken);
-    localStorage.setItem('refreshTokenQuiz', refreshToken);
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem("accessTokenQuiz", accessToken);
+    localStorage.setItem("refreshTokenQuiz", refreshToken);
+    localStorage.setItem("user", JSON.stringify(user));
   };
 
   // Clear auth data from localStorage
   const clearAuthData = () => {
-    localStorage.removeItem('accessTokenQuiz');
-    localStorage.removeItem('refreshTokenQuiz');
-    localStorage.removeItem('user');
+    localStorage.removeItem("accessTokenQuiz");
+    localStorage.removeItem("refreshTokenQuiz");
+    localStorage.removeItem("user");
   };
 
   // Login function
   const login = async (email, password) => {
     dispatch({ type: AUTH_ACTIONS.LOGIN_START });
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.status === 'success') {
+      if (response.ok && data.status === "success") {
         const { user, accessToken, refreshToken } = data.data;
-        
+
         saveAuthData(user, accessToken, refreshToken);
-        
+
         dispatch({
           type: AUTH_ACTIONS.LOGIN_SUCCESS,
           payload: { user, accessToken, refreshToken },
         });
-        
+
         return { success: true, data };
       } else {
         dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE });
-        return { success: false, error: data.message || 'Đăng nhập thất bại' };
+        return { success: false, error: data.message || "Đăng nhập thất bại" };
       }
     } catch (error) {
       dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE });
-      return { success: false, error: 'Lỗi kết nối' };
+      return { success: false, error: "Lỗi kết nối" };
     }
   };
 
   // Register function
   const register = async (name, email, password) => {
     dispatch({ type: AUTH_ACTIONS.REGISTER_START });
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.status === 'success') {
+      if (response.ok && data.status === "success") {
         const { user, accessToken, refreshToken } = data.data;
-        
+
         saveAuthData(user, accessToken, refreshToken);
-        
+
         dispatch({
           type: AUTH_ACTIONS.REGISTER_SUCCESS,
           payload: { user, accessToken, refreshToken },
         });
-        
+
         return { success: true, data };
       } else {
         dispatch({ type: AUTH_ACTIONS.REGISTER_FAILURE });
-        return { success: false, error: data.message || 'Đăng ký thất bại' };
+        return { success: false, error: data.message || "Đăng ký thất bại" };
       }
     } catch (error) {
       dispatch({ type: AUTH_ACTIONS.REGISTER_FAILURE });
-      return { success: false, error: 'Lỗi kết nối' };
+      return { success: false, error: "Lỗi kết nối" };
     }
   };
 
@@ -216,14 +220,14 @@ export const AuthProvider = ({ children }) => {
       // Call logout API if accessToken exists
       if (state.accessToken) {
         await fetch(`${API_BASE_URL}/api/auth/logout`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${state.accessToken}`,
+            Authorization: `Bearer ${state.accessToken}`,
           },
         });
       }
     } catch (error) {
-      console.error('Logout API error:', error);
+      console.error("Logout API error:", error);
     } finally {
       clearAuthData();
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -234,26 +238,26 @@ export const AuthProvider = ({ children }) => {
   const refreshToken = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ refreshToken: state.refreshToken }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.status === 'success') {
+      if (response.ok && data.status === "success") {
         const { accessToken, refreshToken: newRefreshToken } = data.data;
-        
-        localStorage.setItem('accessTokenQuiz', accessToken);
-        localStorage.setItem('refreshTokenQuiz', newRefreshToken);
-        
+
+        localStorage.setItem("accessTokenQuiz", accessToken);
+        localStorage.setItem("refreshTokenQuiz", newRefreshToken);
+
         dispatch({
           type: AUTH_ACTIONS.REFRESH_TOKEN_SUCCESS,
           payload: { accessToken, refreshToken: newRefreshToken },
         });
-        
+
         return { success: true, accessToken };
       } else {
         // Refresh token expired, logout user
@@ -270,33 +274,33 @@ export const AuthProvider = ({ children }) => {
   const getProfile = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${state.accessToken}`,
+          Authorization: `Bearer ${state.accessToken}`,
         },
       });
 
       const data = await response.json();
 
-      if (response.ok && data.status === 'success') {
+      if (response.ok && data.status === "success") {
         const user = data.data.user;
-        localStorage.setItem('user', JSON.stringify(user));
-        
+        localStorage.setItem("user", JSON.stringify(user));
+
         dispatch({
           type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: { 
-            user, 
-            accessToken: state.accessToken, 
-            refreshToken: state.refreshToken 
+          payload: {
+            user,
+            accessToken: state.accessToken,
+            refreshToken: state.refreshToken,
           },
         });
-        
+
         return { success: true, user };
       } else {
         return { success: false, error: data.message };
       }
     } catch (error) {
-      return { success: false, error: 'Lỗi kết nối' };
+      return { success: false, error: "Lỗi kết nối" };
     }
   };
 
@@ -309,18 +313,14 @@ export const AuthProvider = ({ children }) => {
     getProfile,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 // Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

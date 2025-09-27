@@ -9,7 +9,7 @@ export default function QuizCreatePage() {
   const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
-  const [model, setModel] = useState("gemini-2.0-flash");
+  const [model, setModel] = useState("gemini-2.5-flash");
   const [questionCount, setQuestionCount] = useState(5);
   
   // Tính số câu hỏi tự động dựa trên text

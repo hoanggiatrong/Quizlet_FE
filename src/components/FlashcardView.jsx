@@ -93,6 +93,16 @@ export default function FlashcardView({ questions, current, setCurrent, showAnsw
                 <div className="text-lg font-medium leading-relaxed whitespace-pre-line overflow-y-auto max-h-64 w-full px-4" style={{ color: 'var(--text-primary)' }}>
                   {correctAnswer?.text || "Chưa có định nghĩa"}
                 </div>
+                {q.explanation && (
+                  <div className="mt-4 p-3 rounded-lg border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                    <h4 className="text-sm font-medium mb-1" style={{ color: 'rgba(59, 130, 246, 0.9)' }}>
+                      Giải thích:
+                    </h4>
+                    <p className="text-sm whitespace-pre-line" style={{ color: 'rgba(59, 130, 246, 0.8)' }}>
+                      {q.explanation}
+                    </p>
+                  </div>
+                )}
                 <div className="mt-6 text-sm text-blue-600">
                   Nhấp để xem thuật ngữ
                 </div>

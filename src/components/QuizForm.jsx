@@ -1,6 +1,24 @@
 import { useState } from "react";
 import { utils } from "../utils/api";
 
+// Hàm xử lý template với các biến động
+function processTemplate(template, variables = {}) {
+  if (!template) return template;
+  
+  // Thay thế các biến trong template
+  let processedTemplate = template;
+  
+  Object.keys(variables).forEach(key => {
+    const value = variables[key];
+    // Escape special regex characters trong key
+    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`\\$\\{${escapedKey}\\}`, 'g');
+    processedTemplate = processedTemplate.replace(regex, value);
+  });
+  
+  return processedTemplate;
+}
+
 // Template prompts
 const PROMPT_TEMPLATES = {
   default: `Bạn là "Cô Trang", một giáo viên tiếng Anh với hơn 10 năm kinh nghiệm. Hãy tạo quiz theo đúng config sau:
@@ -53,7 +71,8 @@ Quy tắc:
 {
   "questions": [
     {
-      "prompt": "Từ mới: [The English Word]\\nĐịnh nghĩa (EN): [English definition from a reliable dictionary]\\nTừ loại: [Part of speech, e.g., noun, verb, adj]\\nNghĩa tiếng Việt: [Accurate Vietnamese meaning]\\nMẹo ghi nhớ: [A fun, practical, or funny tip in 'Cô Trang' style]\\nPhát âm (IPA): /[pronunciation]/\\nTừ đồng nghĩa:[Synonyms if available]\\nTừ trái nghĩa: [Antonyms if available]",
+      "prompt": "Từ mới: [The English Word]\nĐịnh nghĩa (EN): [English definition from a reliable dictionary]\nTừ loại: [Part of speech, e.g., noun, verb, adj]\nNghĩa tiếng Việt: [Accurate Vietnamese meaning]\nMẹo ghi nhớ: [A fun, practical, or funny tip in 'Cô Trang' style]\nPhát âm (IPA): /[pronunciation]/\nTừ đồng nghĩa:[Synonyms if available]\nTừ trái nghĩa: [Antonyms if available]\n
+Explaination: "Hội thoại/Ví dụ thực tế: [A short, natural dialogue or a practical example sentence showing how the word is used in daily life. Make it fun and relatable.]"",
       "question": "[The English Word] trong tiếng Việt có nghĩa là gì?",
       "choices": [
         {"text": "Nghĩa tiếng Việt sai 1", "isCorrect": false},
@@ -61,7 +80,6 @@ Quy tắc:
         {"text": "Nghĩa tiếng Việt đúng", "isCorrect": true},
         {"text": "Nghĩa tiếng Việt sai 3", "isCorrect": false}
       ],
-      "explanation": "Hội thoại/Ví dụ thực tế: [A short, natural dialogue or a practical example sentence showing how the word is used in daily life. Make it fun and relatable.]"
     }
   ]
 }
@@ -69,7 +87,7 @@ Quy tắc:
 Yêu cầu chi tiết cho từng trường:
 
 prompt: Đây là phần "thẻ học từ vựng" (flashcard).
-- Mỗi thông tin phải nằm trên một dòng riêng biệt (sử dụng \\n).
+- Mỗi thông tin phải nằm trên một dòng riêng biệt (sử dụng \n).
 - Mẹo ghi nhớ: Phải thật sáng tạo, dễ liên tưởng. Ví dụ: "Từ 'diligent' (siêng năng) nghe hơi giống 'đi đi dần'. Muốn thành công thì cứ 'đi đi dần' là tới, phải siêng năng lên!"
 
 question: Câu hỏi phải ngắn gọn, hỏi trực tiếp nghĩa tiếng Việt của từ.
@@ -103,6 +121,9 @@ export default function QuizForm({
   onSubmit 
 }) {
   const [selectedTemplate, setSelectedTemplate] = useState("");
+  
+  // Tạo danh sách câu hỏi từ text
+  const questions = text.split('\n').filter(line => line.trim().length > 0);
   return (
     <form
       onSubmit={onSubmit}
@@ -185,9 +206,11 @@ export default function QuizForm({
                 color: 'var(--text-primary)' 
               }}
             >
-              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-              <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash ✅ - Stable, nhanh, 1M tokens</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro ✅ - Stable, mạnh, 1M tokens</option>
+              <option value="gemini-2.0-flash-001">Gemini 2.0 Flash 001 ✅ - Stable, nhanh</option>
+              <option value="gemini-flash-latest">Gemini Flash Latest ✅ - Latest stable</option>
+              <option value="gemini-pro-latest">Gemini Pro Latest ✅ - Latest stable</option>
             </select>
           </div>
 
@@ -323,10 +346,16 @@ export default function QuizForm({
                   // Giữ nguyên giá trị hiện tại
                   return;
                 } else {
-                  // Load template
+                  // Load template và xử lý với các biến
                   const template = PROMPT_TEMPLATES[templateKey];
                   if (template) {
-                    setPromptExtension(template);
+                    const variables = {
+                      questions: questions.join('\n'),
+                      'questions.length': questions.length,
+                      sourceText: text
+                    };
+                    const processedTemplate = processTemplate(template, variables);
+                    setPromptExtension(processedTemplate);
                   }
                 }
               }}
@@ -395,7 +424,7 @@ export default function QuizForm({
           onClick={() => {
             setTitle("");
             setText("");
-            setModel("gemini-2.0-flash");
+            setModel("gemini-2.5-flash");
             setQuestionCount(5);
             setQuestionType("mixed");
             setChoicesPerQuestion(4);
